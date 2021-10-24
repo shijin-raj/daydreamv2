@@ -30,20 +30,31 @@
         transition: all 0.5s ease;
         /* box-shadow: 1px 1px 1px 1px; */
       }
+.output-grid{
+  display: grid;
+  grid-gap: 0px;
+    /* grid-template-columns: repeat(4, 100px);
+    grid-template-rows: repeat(4,100px); */
+}
+      .grid-item{
+        width: 100px;
+        height: 100px;
+      }
     </style>
 
     <div class="container">
       <h6 class="p-3">
-        Setting the BODY's background to the average color in the following
-        image:
+        Choose an image and block size then click "Extract"
       </h6>
-      <div>
-        <label for="inpX">Offset X</label>
-        <input type="number" id="inpX" min="0" step="10" placeholder="Offset X" />
-        <label for="inpY">Offset Y</label>
-        <input type="number" id="inpY" min="0" step="10" placeholder="Offset Y" />
-        <label for="blockSize">Block Size</label>
-        <input type="number" id="blockSize" min="0" step="10" placeholder="Block Size" />
+      <div class="d-flex align-items-center">
+        <input type='file' onchange="readURL(this);" />
+        <label for="blockSize" class="px-2">Block Size</label>
+        <input type="range" id="blockSize" class="ml-2" min="5" value="5" max="100" step="5" placeholder="Block Size" />
+        <div class="d-flex justify-content-center align-items-center mx-2 border rounded-circle " style="width: 32px;height: 32px;">
+          <span id="sliderVal" class="text-center text-primary p-2">5</span>
+        </div>
+        <button class="btn btn-primary btn-sm mx-3" id="btnExtract">Extract</button>
+
       </div>
 
       <div id="imgContainer" class="img-container mt-3 d-flex">
@@ -51,75 +62,130 @@
           <div class="selection-box shadow border" id="selectionBox"></div>
           <img src="img.png" alt="img" id="i" />
         </div>
-        <div id="outputContainer"></div>
+        <div id="outputContainer">
+          <div class="output-grid" id="outputGrid">
+          </div>
+
+        </div>
       </div>
     </div>
 
     <script>
+function readURL(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
 
+    reader.onload = function (e) {
+      $("#i").attr("src", e.target.result);
+    };
+
+    reader.readAsDataURL(input.files[0]);
+  }
+}
       $(document).ready(() => {
         setDefaults();
         processImage();
-        $("#inpX").on("change", () => {
-          processImage();
-        });
-
-        $("#inpY").on("change", () => {
-          processImage();
-        });
-
-        $("#blockSize").on("change", (e) => {
-          processImage();
-        });
+        $("#blockSize").on('input',(e)=>{
+          if(e.target.value<5){
+            $("#blockSize").val(5);
+          }
+          $(`#sliderVal`).text($("#blockSize").val());
+        })
+        $("#btnExtract").on("click",(e)=>{
+          let btnElement= $("#btnExtract");
+          btnElement.prop("disabled",true);
+          btnElement.text("Extracting...");
+          setTimeout(()=>{
+            processImage(()=>{
+              btnElement.prop("disabled",false);
+              btnElement.text("Extract");
+            });
+          },100)
+        })
 
       });
 
+      function outputImage(rgbProps){
+        let params= parseInputs();
+        let grid=$("#outputGrid");
+        grid.html("");
+        grid.css({
+          "grid-template-rows":`repeat(${params.gridRows},${params.blockSize}px)`,
+          "grid-template-columns":`repeat(${params.gridCols},${params.blockSize}px)`,
+        })
+        let maxHeight= params.imgHeight-params.blockSize;
+        let maxWidth =  params.imgWidth-params.blockSize;
+        for(let i=0;i<params.gridRows;i++){
+          for(let j=0;j<params.gridCols;j++){
+            let rgb=rgbProps[i][j];
+            if(rgb){
+              let div=`<div style="background:rgb(${rgb.r},${rgb.g},${rgb.b})" id="box_${i}_${j}"></div>`;
+              grid.append(div);
+            }
+          }
+        }
+      }
+
       function setDefaults(){
-        $("#inpX").val(0);
-        $("#inpY").val(0);
-        $("#blockSize").val(100);
+        $("#blockSize").val(5);
+        $("#sliderVal").text(5);
       }
-      function processImage() {
-        let offsetX = parseInt($("#inpX").val());
-        let offsetY = parseInt($("#inpY").val());
+
+      function processImage(callback=null) {
+      extractRGB().then(data=>{
+              outputImage(data);
+              if(callback){
+                callback();
+              }
+            });
+      }
+
+function parseInputs(){
         let blockSize= parseInt($("#blockSize").val());
+        if(blockSize<5){
+          blockSize=5;
+          $("#blockSize").val(blockSize);
+        }
         let imgWidth= parseInt($('#i').width());
         let imgHeight= parseInt($('#i').height());
-        if(imgWidth<=(offsetX+blockSize))
-        {
-          offsetX=imgWidth-blockSize;
-          $("#inpX").val(offsetX);
+          let gridRows= ~~(imgWidth/blockSize);
+          let gridCols= ~~(imgHeight/blockSize);
+
+          return {
+            blockSize,
+            imgWidth,
+            imgHeight,
+            gridRows,
+            gridCols
+          };
+}
+
+      function extractRGB(){
+  
+        return new Promise((resolve,reject)=>{
+          let rgbProps=[];
+        let params= parseInputs();
+        let imgElem= document.getElementById("i");
+        let maxHeight= params.imgHeight-params.blockSize;
+        let maxWidth =  params.imgWidth-params.blockSize;
+        for(let i=0;i<=maxHeight;i+=params.blockSize){
+          let row=[];
+          for(let j=0;j<=maxWidth;j+=params.blockSize){
+            let rgb = getAverageRGB(imgElem,j, i,params.blockSize);
+            row.push(rgb);
+          }
+          rgbProps.push(row);
         }
-
-        if(imgHeight<=(offsetY+blockSize))
-        {
-          offsetY=imgHeight-blockSize;
-          $("#inpY").val(offsetY);
+        if(rgbProps.length>0){
+          resolve(rgbProps);
         }
-console.log(offsetX,offsetY);
-
-        $("#selectionBox")
-          .width(blockSize)
-          .height(blockSize)
-          .css({ "margin-left": offsetX + "px","margin-top":offsetY+"px" });
-
-        var rgb = getAverageRGB(document.getElementById("i"), offsetX, offsetY,blockSize);
-        $("#outputContainer").css(
-          "background",
-          `rgb(${rgb.r},${rgb.g},${rgb.b})`
-        );
-      }
-      //   document.body.style.backgroundColor =
-      //     "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
-
-
-      function drawRGBImage(){
-        let rgbProps=[];
-        let imgWidth= parseInt($('#i').width());
-        let imgHeight= parseInt($('#i').height());
+        else{
+          reject([]);
+        }
+        })
       }
 
-      function getAverageRGB(imgEl, sx = 0, sy = 0,blockSize=100) {
+      function getAverageRGB(imgEl, sx = 0, sy = 0,blockSize=5) {
         var gridSize=5;
         var defaultRGB = {
             r: 255,
@@ -168,10 +234,10 @@ console.log(offsetX,offsetY);
           // data = context.getImageData(0, 0, width, height);
           data = context.getImageData(0, 0, blockSize, blockSize);
 
-          let output = `<img alt="output" src="${canvas.toDataURL(
-            "image/png"
-          )}" />`;
-          $("#outputContainer").html(output);
+          // let output = `<img alt="output" src="${canvas.toDataURL(
+          //   "image/png"
+          // )}" />`;
+          // $("#outputContainer").html(output);
         } catch (e) {
           /* security error, img on diff domain */
           console.log(e);
