@@ -44,6 +44,10 @@
         width: 100px;
         height: 100px;
       }
+      .sub-image{
+        width: 200px;
+        height: 200px;
+      }
     </style>
 
     <div class="container py-5">
@@ -51,36 +55,37 @@
 
       <h6 class="py-3"> Choose sub images</h6>
 
-      <div class="sub-img-container d-flex flex-column mt-4">
+      <div class="sub-img-container d-flex flex-wrap mt-4" id="source">
+        <!-- <input type="file" multiple onchange="test2(this)" /> -->
         <div>
           <input type='file' name="subimage[]" onchange="test(this,'BK')" />
           <div class="d-flex">
-            <img src="https://picsum.photos/500" class="sub-image" alt="img" id="BK" crossorigin="anonymous"/>
+            <img src="#" class="sub-image" alt="img" id="BK" crossorigin="anonymous"/>
           </div>
         </div>
         <div>
           <input type='file' name="subimage[]" onchange="test(this,'WT')" />
           <div class="d-flex">
-            <img src="https://picsum.photos/500" class="sub-image" alt="img" id="WT" crossorigin="anonymous"/>
+            <img src="#" class="sub-image" alt="img" id="WT" crossorigin="anonymous"/>
 
           </div>
         </div>
         <div>
           <input type='file' name="subimage[]" onchange="test(this,'RD')" />
           <div class="d-flex">
-            <img src="https://picsum.photos/500" class="sub-image" alt="img" id="RD" crossorigin="anonymous"/>
+            <img src="#" class="sub-image" alt="img" id="RD" crossorigin="anonymous"/>
           </div>
         </div>
         <div>
           <input type='file' name="subimage[]" onchange="test(this,'GN')" />
           <div class="d-flex">
-            <img src="https://picsum.photos/500" class="sub-image" alt="img" id="GN" crossorigin="anonymous"/>
+            <img src="#" class="sub-image" alt="img" id="GN" crossorigin="anonymous"/>
           </div>
         </div>
         <div>
           <input type='file' name="subimage[]" onchange="test(this,'BL')" />
           <div class="d-flex">
-            <img src="https://picsum.photos/500" class="sub-image" alt="img" id="BL" crossorigin="anonymous"/>
+            <img src="#" class="sub-image" alt="img" id="BL" crossorigin="anonymous"/>
           </div>
         </div>
       </div>
@@ -108,16 +113,43 @@
           <div class="spinner-border text-primary m-2" style="display: none;" role="status" id="outputLoader">
             <span class="sr-only"></span>
           </div>
+         
+        </div>
           <div class="output-grid" id="outputGrid">
           </div>
         </div>
-      </div>
+        <canvas id="outputCanvas" width="5000" height="5000" style="border: 1px solid black;">
+  
+        </canvas>
     </div>
-
+    
     <script>
-
+      
+      var subColors=[];
 function test(inp,index){
 readURL(inp,index);
+}
+function test2(input){
+  if (input.files && input.files[0]) {
+    let count= input.files.length;
+    for(let i=0;i<count;i++){
+      var reader = new FileReader();
+
+    reader.onload = function (e) {
+      let img=`<img src="${e.target.result}" alt="img" id="img_${i+1}" class="sub-image" />`;
+      $(`#source`).append(img);
+    };
+
+    reader.readAsDataURL(input.files[i]);
+    }
+    // var reader = new FileReader();
+
+    // reader.onload = function (e) {
+    //   $(`#${output}`).attr("src", e.target.result);
+    // };
+
+    // reader.readAsDataURL(input.files[0]);
+  }
 }
 
 function readURL(input,output="i") {
@@ -141,7 +173,6 @@ return parseFloat(r+g+b);
 
       $(document).ready(() => {
         $("input").val('');
-        var subColors=[];
         $(".sub-image").on('load',(e)=>{
           let imgEl= $(e.target);
           let imgId= e.target.id;
@@ -201,20 +232,47 @@ return parseFloat(r+g+b);
         })
         let maxHeight= params.imgHeight-params.blockSize;
         let maxWidth =  params.imgWidth-params.blockSize;
+        let positionI=0;
+        var canvas = document.getElementById("outputCanvas");
+        var context = canvas.getContext && canvas.getContext("2d");
         for(let i=0;i<params.gridRows;i++){
+          let positionJ=0;
           for(let j=0;j<params.gridCols;j++){
             let rgb=rgbProps[i][j];
             if(rgb){
-              let div=`<div style="background:rgb(${rgb.r},${rgb.g},${rgb.b})" id="box_${i}_${j}"></div>`;
-              grid.append(div);
+             // let div=`<div style="background:rgb(${rgb.r},${rgb.g},${rgb.b})" id="box_${i}_${j}"></div>`;
+             // grid.append(div);
+              if(subColors.length>0){
+                let colorVal= getColorVal(rgb);
+                let min=Math.abs(colorVal-subColors[0].colorVal);
+                let match=subColors[0];
+                subColors.forEach(item=>{
+                  let diff= Math.abs(colorVal-item.colorVal);
+                  if(diff<min){
+                    min=diff;
+                    match=item;
+                  }
+                });
+               if(match){
+                //  let imgSrc= $(`#${match.id}`).attr('src');
+                //  let img= `<img src="${imgSrc}" style="width:${params.blockSize}px;height:${params.blockSize}px" alt="img" id="box_${i}_${j}"></img>`;
+                // grid.append(img);
+
+                var img= document.getElementById(match.id);
+        context.drawImage(img,0,0,500,500,positionJ,positionI,params.blockSize*10,params.blockSize*10);
+
+               }
+              }
             }
+            positionJ+=params.blockSize*10;
           }
+          positionI+=params.blockSize*10
         }
       }
 
       function setDefaults(){
-        $("#blockSize").val(5);
-        $("#sliderVal").text(5);
+        $("#blockSize").val(100);
+        $("#sliderVal").text(100);
       }
 
       function processImage(callback=null) {
@@ -345,6 +403,16 @@ function parseInputs(){
         rgb.b = ~~(rgb.b / count);
 
         return rgb;
+      }
+
+      function drawCanvas(imgId,dx=0,dy=0){
+        let params= parseInputs();
+       
+        
+      }
+
+      function openCanvas(){
+        window.open(document.getElementById("outputCanvas").toDataURL());
       }
     </script>
   </body>
