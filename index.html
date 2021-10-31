@@ -24,6 +24,10 @@
   </head>
   <body>
     <style>
+      img{
+        width: 500px;
+        height: 500px;
+      }
       .selection-box {
         position: absolute;
         /* border: 1px solid red; */
@@ -44,6 +48,43 @@
 
     <div class="container py-5">
       <h1 class="border-bottom">DAYDREAM</h1>
+
+      <h6 class="py-3"> Choose sub images</h6>
+
+      <div class="sub-img-container d-flex flex-column mt-4">
+        <div>
+          <input type='file' name="subimage[]" onchange="test(this,'BK')" />
+          <div class="d-flex">
+            <img src="https://picsum.photos/500" class="sub-image" alt="img" id="BK" crossorigin="anonymous"/>
+          </div>
+        </div>
+        <div>
+          <input type='file' name="subimage[]" onchange="test(this,'WT')" />
+          <div class="d-flex">
+            <img src="https://picsum.photos/500" class="sub-image" alt="img" id="WT" crossorigin="anonymous"/>
+
+          </div>
+        </div>
+        <div>
+          <input type='file' name="subimage[]" onchange="test(this,'RD')" />
+          <div class="d-flex">
+            <img src="https://picsum.photos/500" class="sub-image" alt="img" id="RD" crossorigin="anonymous"/>
+          </div>
+        </div>
+        <div>
+          <input type='file' name="subimage[]" onchange="test(this,'GN')" />
+          <div class="d-flex">
+            <img src="https://picsum.photos/500" class="sub-image" alt="img" id="GN" crossorigin="anonymous"/>
+          </div>
+        </div>
+        <div>
+          <input type='file' name="subimage[]" onchange="test(this,'BL')" />
+          <div class="d-flex">
+            <img src="https://picsum.photos/500" class="sub-image" alt="img" id="BL" crossorigin="anonymous"/>
+          </div>
+        </div>
+      </div>
+
       <h6 class="py-3">
         Choose an image and block size then click "Extract"
       </h6>
@@ -74,18 +115,51 @@
     </div>
 
     <script>
-function readURL(input) {
+
+function test(inp,index){
+readURL(inp,index);
+}
+
+function readURL(input,output="i") {
   if (input.files && input.files[0]) {
     var reader = new FileReader();
 
     reader.onload = function (e) {
-      $("#i").attr("src", e.target.result);
+      $(`#${output}`).attr("src", e.target.result);
     };
 
     reader.readAsDataURL(input.files[0]);
   }
 }
+
+function getColorVal(rgb){
+  let r=parseFloat(rgb.r*0.2126);
+  let g=parseFloat(rgb.g*0.7152);
+  let b=parseFloat(rgb.b*0.0722);
+return parseFloat(r+g+b);
+}
+
       $(document).ready(() => {
+        $("input").val('');
+        var subColors=[];
+        $(".sub-image").on('load',(e)=>{
+          let imgEl= $(e.target);
+          let imgId= e.target.id;
+          console.log(e.target.id);
+          let rgb= getAverageRGB(e.target,0,0,imgEl.width());
+          let itemIndex=subColors.findIndex(item=>item.r===rgb.r&&item.g===rgb.g&&item.b===rgb.b);
+          if(itemIndex<0){
+            rgb.id=imgId;
+            rgb.colorVal= getColorVal(rgb);
+            subColors.push(rgb);
+            subColors= [...new Set(subColors)];
+            console.log(subColors,itemIndex);
+          }
+          let div=`<div style="background:rgb(${rgb.r},${rgb.g},${rgb.b});width:${imgEl.width()}px;height:${imgEl.height()}px" id="clr_${imgId}">JSB</div>`;
+          $(`#clr_${imgId}`).remove();
+          $(e.target).parent().append(div);
+        })
+
         $("#i").on('load',()=>{
           setDefaults();
           $("#outputGrid").html("");
@@ -172,12 +246,12 @@ function parseInputs(){
           };
 }
 
-      function extractRGB(){
+      function extractRGB(imageId="i"){
   
         return new Promise((resolve,reject)=>{
           let rgbProps=[];
         let params= parseInputs();
-        let imgElem= document.getElementById("i");
+        let imgElem= document.getElementById(`${imageId}`);
         let maxHeight= params.imgHeight-params.blockSize;
         let maxWidth =  params.imgWidth-params.blockSize;
         for(let i=0;i<=maxHeight;i+=params.blockSize){
