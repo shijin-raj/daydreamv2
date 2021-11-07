@@ -24,7 +24,7 @@
   </head>
   <body>
     <style>
-      img{
+      img {
         width: 500px;
         height: 500px;
       }
@@ -34,17 +34,17 @@
         transition: all 0.5s ease;
         /* box-shadow: 1px 1px 1px 1px; */
       }
-.output-grid{
-  display: grid;
-  grid-gap: 0px;
-    /* grid-template-columns: repeat(4, 100px);
+      .output-grid {
+        display: grid;
+        grid-gap: 0px;
+        /* grid-template-columns: repeat(4, 100px);
     grid-template-rows: repeat(4,100px); */
-}
-      .grid-item{
+      }
+      .grid-item {
         width: 100px;
         height: 100px;
       }
-      .sub-image{
+      .sub-image {
         width: 200px;
         height: 200px;
       }
@@ -52,285 +52,304 @@
 
     <div class="container py-5">
       <h1 class="border-bottom">DAYDREAM</h1>
-
-      <h6 class="py-3"> Choose sub images</h6>
+      <h6 class="py-3">Choose sub images</h6>
+      <input
+        type="file"
+        type="file"
+        name="subimage[]"
+        multiple
+        onchange="readMultipleFiles(this)"
+      />
 
       <div class="sub-img-container d-flex flex-wrap mt-4" id="source">
-        <!-- <input type="file" multiple onchange="test2(this)" /> -->
-        <div>
-          <input type='file' name="subimage[]" onchange="test(this,'BK')" />
-          <div class="d-flex">
-            <img src="#" class="sub-image" alt="img" id="BK" crossorigin="anonymous"/>
-          </div>
-        </div>
-        <div>
-          <input type='file' name="subimage[]" onchange="test(this,'WT')" />
-          <div class="d-flex">
-            <img src="#" class="sub-image" alt="img" id="WT" crossorigin="anonymous"/>
-
-          </div>
-        </div>
-        <div>
-          <input type='file' name="subimage[]" onchange="test(this,'RD')" />
-          <div class="d-flex">
-            <img src="#" class="sub-image" alt="img" id="RD" crossorigin="anonymous"/>
-          </div>
-        </div>
-        <div>
-          <input type='file' name="subimage[]" onchange="test(this,'GN')" />
-          <div class="d-flex">
-            <img src="#" class="sub-image" alt="img" id="GN" crossorigin="anonymous"/>
-          </div>
-        </div>
-        <div>
-          <input type='file' name="subimage[]" onchange="test(this,'BL')" />
-          <div class="d-flex">
-            <img src="#" class="sub-image" alt="img" id="BL" crossorigin="anonymous"/>
-          </div>
-        </div>
       </div>
 
-      <h6 class="py-3">
-        Choose an image and block size then click "Extract"
-      </h6>
+      <h6 class="py-3">Choose an image and block size then click "Render"</h6>
       <div class="d-flex align-items-center">
-        <input type='file' onchange="readURL(this);" />
+        <input type="file" onchange="readURL(this);" />
         <label for="blockSize" class="px-2">Block Size</label>
-        <input type="range" id="blockSize" class="ml-2" min="5" value="5" max="100" step="5" placeholder="Block Size" />
-        <div class="d-flex justify-content-center align-items-center mx-2 border rounded-circle " style="width: 32px;height: 32px;">
+        <input
+          type="range"
+          id="blockSize"
+          class="ml-2"
+          min="5"
+          value="5"
+          max="100"
+          step="5"
+          placeholder="Block Size"
+        />
+        <div
+          class="
+            d-flex
+            justify-content-center
+            align-items-center
+            mx-2
+            border
+            rounded-circle
+          "
+          style="width: 32px; height: 32px"
+        >
           <span id="sliderVal" class="text-center text-primary p-2">5</span>
         </div>
-        <button class="btn btn-primary btn-sm mx-3" id="btnExtract">Extract</button>
-
+        <button class="btn btn-primary btn-sm mx-3" id="btnRender">
+          Render
+        </button>
       </div>
 
       <div id="imgContainer" class="img-container mt-3 d-flex">
         <div id="sourceContainer">
           <!-- https://picsum.photos/500 for random pictures -->
-          <img src="https://picsum.photos/500" alt="img" id="i" crossorigin="anonymous"/>
+          <img src="" alt="img" id="i" crossorigin="anonymous" />
         </div>
         <div id="outputContainer">
-          <div class="spinner-border text-primary m-2" style="display: none;" role="status" id="outputLoader">
+          <div
+            class="spinner-border text-primary m-2"
+            style="display: none"
+            role="status"
+            id="outputLoader"
+          >
             <span class="sr-only"></span>
           </div>
-         
         </div>
-          <div class="output-grid" id="outputGrid">
-          </div>
-        </div>
-        <canvas id="outputCanvas" width="5000" height="5000" style="border: 1px solid black;">
-  
-        </canvas>
+        <div class="output-grid" id="outputGrid"></div>
+      </div>
+      <canvas
+        id="outputCanvas"
+        width="5000"
+        height="5000"
+        style="border: 1px solid black"
+      >
+      </canvas>
     </div>
-    
+
     <script>
-      
-      var subColors=[];
-function test(inp,index){
-readURL(inp,index);
-}
-function test2(input){
-  if (input.files && input.files[0]) {
-    let count= input.files.length;
-    for(let i=0;i<count;i++){
-      var reader = new FileReader();
+      var subColors = [];
 
-    reader.onload = function (e) {
-      let img=`<img src="${e.target.result}" alt="img" id="img_${i+1}" class="sub-image" />`;
-      $(`#source`).append(img);
-    };
+      function readMultipleFiles(input) {
+        $(`#source`).html("");
+        subColors = [];
+        if (input.files && input.files[0]) {
+          let count = input.files.length;
+          for (let i = 0; i < count; i++) {
+            var reader = new FileReader();
 
-    reader.readAsDataURL(input.files[i]);
-    }
-    // var reader = new FileReader();
+            reader.onload = function (e) {
+              let img = `<img src="${e.target.result}" alt="img" id="img_${
+                i + 1
+              }" class="sub-image" />`;
+              let div = document.createElement("div");
+              let imgEl = $("<img>", {
+                id: `img_${i + 1}`,
+                class: "sub-image",
+                alt: "img",
+                src: e.target.result,
+                crossorigin: "anonymous",
+              });
+              imgEl.on("load", () => {
+                calculateSubColor(imgEl);
+              });
+              console.log(imgEl);
+              $(div).html(imgEl);
+              $(`#source`).append(div);
+            };
 
-    // reader.onload = function (e) {
-    //   $(`#${output}`).attr("src", e.target.result);
-    // };
-
-    // reader.readAsDataURL(input.files[0]);
-  }
-}
-
-function readURL(input,output="i") {
-  if (input.files && input.files[0]) {
-    var reader = new FileReader();
-
-    reader.onload = function (e) {
-      $(`#${output}`).attr("src", e.target.result);
-    };
-
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-
-function getColorVal(rgb){
-  let r=parseFloat(rgb.r*0.2126);
-  let g=parseFloat(rgb.g*0.7152);
-  let b=parseFloat(rgb.b*0.0722);
-return parseFloat(r+g+b);
-}
-
-      $(document).ready(() => {
-        $("input").val('');
-        $(".sub-image").on('load',(e)=>{
-          let imgEl= $(e.target);
-          let imgId= e.target.id;
-          console.log(e.target.id);
-          let rgb= getAverageRGB(e.target,0,0,imgEl.width());
-          let itemIndex=subColors.findIndex(item=>item.r===rgb.r&&item.g===rgb.g&&item.b===rgb.b);
-          if(itemIndex<0){
-            rgb.id=imgId;
-            rgb.colorVal= getColorVal(rgb);
-            subColors.push(rgb);
-            subColors= [...new Set(subColors)];
-            console.log(subColors,itemIndex);
+            reader.readAsDataURL(input.files[i]);
           }
-          let div=`<div style="background:rgb(${rgb.r},${rgb.g},${rgb.b});width:${imgEl.width()}px;height:${imgEl.height()}px" id="clr_${imgId}">JSB</div>`;
-          $(`#clr_${imgId}`).remove();
-          $(e.target).parent().append(div);
-        })
 
-        $("#i").on('load',()=>{
-          setDefaults();
-          $("#outputGrid").html("");
-          $(`#outputLoader`).show();
-          processImage(()=>{
-            $(`#outputLoader`).hide();
-        });
-        });
-        $("#blockSize").on('input',(e)=>{
-          if(e.target.value<5){
-            $("#blockSize").val(5);
-          }
-          $(`#sliderVal`).text($("#blockSize").val());
-        })
-        $("#btnExtract").on("click",(e)=>{
-          let btnElement= $("#btnExtract");
-          btnElement.prop("disabled",true);
-          btnElement.text("Extracting...");
-          $("#outputGrid").html("");
-          $(`#outputLoader`).show();
-          setTimeout(()=>{
-            processImage(()=>{
-              btnElement.prop("disabled",false);
-              btnElement.text("Extract");
-              $(`#outputLoader`).hide();
-            });
-          },100)
-        })
-
-      });
-
-      function outputImage(rgbProps){
-        let params= parseInputs();
-        let grid=$("#outputGrid");
-        grid.html("");
-        grid.css({
-          "grid-template-rows":`repeat(${params.gridRows},${params.blockSize}px)`,
-          "grid-template-columns":`repeat(${params.gridCols},${params.blockSize}px)`,
-        })
-        let maxHeight= params.imgHeight-params.blockSize;
-        let maxWidth =  params.imgWidth-params.blockSize;
-        let positionI=0;
-        var canvas = document.getElementById("outputCanvas");
-        var context = canvas.getContext && canvas.getContext("2d");
-        for(let i=0;i<params.gridRows;i++){
-          let positionJ=0;
-          for(let j=0;j<params.gridCols;j++){
-            let rgb=rgbProps[i][j];
-            if(rgb){
-             // let div=`<div style="background:rgb(${rgb.r},${rgb.g},${rgb.b})" id="box_${i}_${j}"></div>`;
-             // grid.append(div);
-              if(subColors.length>0){
-                let colorVal= getColorVal(rgb);
-                let min=Math.abs(colorVal-subColors[0].colorVal);
-                let match=subColors[0];
-                subColors.forEach(item=>{
-                  let diff= Math.abs(colorVal-item.colorVal);
-                  if(diff<min){
-                    min=diff;
-                    match=item;
-                  }
-                });
-               if(match){
-                //  let imgSrc= $(`#${match.id}`).attr('src');
-                //  let img= `<img src="${imgSrc}" style="width:${params.blockSize}px;height:${params.blockSize}px" alt="img" id="box_${i}_${j}"></img>`;
-                // grid.append(img);
-
-                var img= document.getElementById(match.id);
-        context.drawImage(img,0,0,500,500,positionJ,positionI,params.blockSize*10,params.blockSize*10);
-
-               }
-              }
-            }
-            positionJ+=params.blockSize*10;
-          }
-          positionI+=params.blockSize*10
         }
       }
 
-      function setDefaults(){
+      function readURL(input, output = "i") {
+        if (input.files && input.files[0]) {
+          var reader = new FileReader();
+
+          reader.onload = function (e) {
+            $(`#${output}`).attr("src", e.target.result);
+          };
+
+          reader.readAsDataURL(input.files[0]);
+        }
+      }
+      function calculateSubColor(imgEl) {
+        let imgId = imgEl.attr("id");
+        let rgb = getAverageRGB(
+          document.getElementById(imgId),
+          0,
+          0,
+          imgEl.width()
+        );
+        let itemIndex = subColors.findIndex(
+          (item) => item.r === rgb.r && item.g === rgb.g && item.b === rgb.b
+        );
+        if (itemIndex < 0) {
+          rgb.id = imgId;
+          rgb.colorVal = getColorVal(rgb);
+          subColors.push(rgb);
+          subColors = [...new Set(subColors)];
+          console.log(subColors, itemIndex);
+        }
+        let div = `<div style="background:rgb(${rgb.r},${rgb.g},${
+          rgb.b
+        });width:${imgEl.width()}px;height:${imgEl.height()}px" id="clr_${imgId}"></div>`;
+        $(`#clr_${imgId}`).remove();
+        imgEl.after(div);
+      }
+      function getColorVal(rgb) {
+        let r = parseFloat(rgb.r * 0.2126);
+        let g = parseFloat(rgb.g * 0.7152);
+        let b = parseFloat(rgb.b * 0.0722);
+        return parseFloat(r + g + b);
+      }
+
+      $(document).ready(() => {
+        $("input").val("");
+
+        $("#i").on("load", () => {
+          setDefaults();
+          $("#outputGrid").html("");
+          $(`#outputLoader`).show();
+          processImage(() => {
+            $(`#outputLoader`).hide();
+          });
+        });
+        $("#blockSize").on("input", (e) => {
+          if (e.target.value < 5) {
+            $("#blockSize").val(5);
+          }
+          $(`#sliderVal`).text($("#blockSize").val());
+        });
+        $("#btnRender").on("click", (e) => {
+          let btnElement = $("#btnRender");
+          btnElement.prop("disabled", true);
+          btnElement.text("Rendering...");
+          $("#outputGrid").html("");
+          $(`#outputLoader`).show();
+          setTimeout(() => {
+            processImage(() => {
+              btnElement.prop("disabled", false);
+              btnElement.text("Render");
+              $(`#outputLoader`).hide();
+            });
+          }, 100);
+        });
+      });
+
+      function outputImage(rgbProps) {
+        let params = parseInputs();
+        let grid = $("#outputGrid");
+        grid.html("");
+        grid.css({
+          "grid-template-rows": `repeat(${params.gridRows},${params.blockSize}px)`,
+          "grid-template-columns": `repeat(${params.gridCols},${params.blockSize}px)`,
+        });
+        let maxHeight = params.imgHeight - params.blockSize;
+        let maxWidth = params.imgWidth - params.blockSize;
+        let positionI = 0;
+        var canvas = document.getElementById("outputCanvas");
+        var context = canvas.getContext && canvas.getContext("2d");
+        for (let i = 0; i < params.gridRows; i++) {
+          let positionJ = 0;
+          for (let j = 0; j < params.gridCols; j++) {
+            let rgb = rgbProps[i][j];
+            if (rgb) {
+              // let div=`<div style="background:rgb(${rgb.r},${rgb.g},${rgb.b})" id="box_${i}_${j}"></div>`;
+              // grid.append(div);
+              if (subColors.length > 0) {
+                let colorVal = getColorVal(rgb);
+                let min = Math.abs(colorVal - subColors[0].colorVal);
+                let match = subColors[0];
+                subColors.forEach((item) => {
+                  let diff = Math.abs(colorVal - item.colorVal);
+                  if (diff < min) {
+                    min = diff;
+                    match = item;
+                  }
+                });
+                if (match) {
+                  //  let imgSrc= $(`#${match.id}`).attr('src');
+                  //  let img= `<img src="${imgSrc}" style="width:${params.blockSize}px;height:${params.blockSize}px" alt="img" id="box_${i}_${j}"></img>`;
+                  // grid.append(img);
+
+                  var img = document.getElementById(match.id);
+                  context.drawImage(
+                    img,
+                    0,
+                    0,
+                    500,
+                    500,
+                    positionJ,
+                    positionI,
+                    params.blockSize * 10,
+                    params.blockSize * 10
+                  );
+                }
+              }
+            }
+            positionJ += params.blockSize * 10;
+          }
+          positionI += params.blockSize * 10;
+        }
+      }
+
+      function setDefaults() {
         $("#blockSize").val(100);
         $("#sliderVal").text(100);
       }
 
-      function processImage(callback=null) {
-      extractRGB().then(data=>{
-              outputImage(data);
-              if(callback){
-                callback();
-              }
-            });
+      function processImage(callback = null) {
+        extractRGB().then((data) => {
+          outputImage(data);
+          if (callback) {
+            callback();
+          }
+        });
       }
 
-function parseInputs(){
-        let blockSize= parseInt($("#blockSize").val());
-        if(blockSize<5){
-          blockSize=5;
+      function parseInputs() {
+        let blockSize = parseInt($("#blockSize").val());
+        if (blockSize < 5) {
+          blockSize = 5;
           $("#blockSize").val(blockSize);
         }
-        let imgWidth= parseInt($('#i').width());
-        let imgHeight= parseInt($('#i').height());
-          let gridRows= ~~(imgWidth/blockSize);
-          let gridCols= ~~(imgHeight/blockSize);
+        let imgWidth = parseInt($("#i").width());
+        let imgHeight = parseInt($("#i").height());
+        let gridRows = ~~(imgWidth / blockSize);
+        let gridCols = ~~(imgHeight / blockSize);
 
-          return {
-            blockSize,
-            imgWidth,
-            imgHeight,
-            gridRows,
-            gridCols
-          };
-}
-
-      function extractRGB(imageId="i"){
-  
-        return new Promise((resolve,reject)=>{
-          let rgbProps=[];
-        let params= parseInputs();
-        let imgElem= document.getElementById(`${imageId}`);
-        let maxHeight= params.imgHeight-params.blockSize;
-        let maxWidth =  params.imgWidth-params.blockSize;
-        for(let i=0;i<=maxHeight;i+=params.blockSize){
-          let row=[];
-          for(let j=0;j<=maxWidth;j+=params.blockSize){
-            let rgb = getAverageRGB(imgElem,j, i,params.blockSize);
-            row.push(rgb);
-          }
-          rgbProps.push(row);
-        }
-        if(rgbProps.length>0){
-          resolve(rgbProps);
-        }
-        else{
-          reject([]);
-        }
-        })
+        return {
+          blockSize,
+          imgWidth,
+          imgHeight,
+          gridRows,
+          gridCols,
+        };
       }
 
-      function getAverageRGB(imgEl, sx = 0, sy = 0,blockSize=5) {
-        var gridSize=5;
+      function extractRGB(imageId = "i") {
+        return new Promise((resolve, reject) => {
+          let rgbProps = [];
+          let params = parseInputs();
+          let imgElem = document.getElementById(`${imageId}`);
+          let maxHeight = params.imgHeight - params.blockSize;
+          let maxWidth = params.imgWidth - params.blockSize;
+          for (let i = 0; i <= maxHeight; i += params.blockSize) {
+            let row = [];
+            for (let j = 0; j <= maxWidth; j += params.blockSize) {
+              let rgb = getAverageRGB(imgElem, j, i, params.blockSize);
+              row.push(rgb);
+            }
+            rgbProps.push(row);
+          }
+          if (rgbProps.length > 0) {
+            resolve(rgbProps);
+          } else {
+            reject([]);
+          }
+        });
+      }
+
+      function getAverageRGB(imgEl, sx = 0, sy = 0, blockSize = 5) {
+        var gridSize = 5;
         var defaultRGB = {
             r: 255,
             g: 255,
@@ -405,13 +424,11 @@ function parseInputs(){
         return rgb;
       }
 
-      function drawCanvas(imgId,dx=0,dy=0){
-        let params= parseInputs();
-       
-        
+      function drawCanvas(imgId, dx = 0, dy = 0) {
+        let params = parseInputs();
       }
 
-      function openCanvas(){
+      function openCanvas() {
         window.open(document.getElementById("outputCanvas").toDataURL());
       }
     </script>
