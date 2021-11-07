@@ -100,7 +100,9 @@
         <div id="sourceContainer">
           <!-- https://picsum.photos/500 for random pictures -->
           <img src="" alt="img" id="i" crossorigin="anonymous" />
-          <img src="" alt="preview" id="preview" crossorigin="anonymous"  width="500px" height="500px" style="cursor:pointer" onclick="openCanvas()" />
+          <a href="" id="downloadLink" download="Daydream.png" >
+            <img src="" alt="preview" id="preview" crossorigin="anonymous"  width="500px" height="500px" style="cursor:pointer"  />
+          </a>
         </div>
         <div id="outputContainer">
           <div
@@ -288,8 +290,8 @@
       }
 
       function setDefaults() {
-        $("#blockSize").val(100);
-        $("#sliderVal").text(100);
+        $("#blockSize").val(5);
+        $("#sliderVal").text(5);
       }
 
       function processImage(callback = null) {
@@ -434,9 +436,9 @@
         // canvas.height=canvas.width=500;
         // context.drawImage(outputCanvas,0,0);
         let src= outputCanvas.toDataURL();
-        let img = `<img width="500px" height="500px" style="cursor:pointer" src="${src}" alt="img" onclick="openCanvas()"/>`;
+        let img = `<img width="500px" height="500px" style="cursor:pointer" src="${src}" alt="img" />`;
         $('#preview').attr('src',`${src}`);
-        
+        $('#downloadLink').attr('href',`${src}`);
       }
     </script>
   </body>
