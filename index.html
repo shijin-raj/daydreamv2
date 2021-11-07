@@ -100,6 +100,7 @@
         <div id="sourceContainer">
           <!-- https://picsum.photos/500 for random pictures -->
           <img src="" alt="img" id="i" crossorigin="anonymous" />
+          <img src="" alt="preview" id="preview" crossorigin="anonymous"  width="500px" height="500px" style="cursor:pointer" onclick="openCanvas()" />
         </div>
         <div id="outputContainer">
           <div
@@ -111,16 +112,15 @@
             <span class="sr-only"></span>
           </div>
         </div>
-        <div class="output-grid" id="outputGrid"></div>
+       
       </div>
-      <button onclick="openCanvas()">Open</button>
       <canvas
-        id="outputCanvas"
-        width="5000"
-        height="5000"
-        style="border: 1px solid black"
+      id="outputCanvas"
+      width="5000"
+      height="5000"
+      style="border: 1px solid black;display: none;"
       >
-      </canvas>
+    </canvas>
     </div>
 
     <script>
@@ -207,7 +207,6 @@
 
         $("#i").on("load", () => {
           setDefaults();
-          $("#outputGrid").html("");
           $(`#outputLoader`).show();
           processImage(() => {
             $(`#outputLoader`).hide();
@@ -223,13 +222,13 @@
           let btnElement = $("#btnRender");
           btnElement.prop("disabled", true);
           btnElement.text("Rendering...");
-          $("#outputGrid").html("");
           $(`#outputLoader`).show();
           setTimeout(() => {
             processImage(() => {
               btnElement.prop("disabled", false);
               btnElement.text("Render");
               $(`#outputLoader`).hide();
+              renderPreview(document.getElementById("outputCanvas"));
             });
           }, 100);
         });
@@ -237,12 +236,7 @@
 
       function outputImage(rgbProps) {
         let params = parseInputs();
-        let grid = $("#outputGrid");
-        grid.html("");
-        grid.css({
-          "grid-template-rows": `repeat(${params.gridRows},${params.blockSize}px)`,
-          "grid-template-columns": `repeat(${params.gridCols},${params.blockSize}px)`,
-        });
+      
         let maxHeight = params.imgHeight - params.blockSize;
         let maxWidth = params.imgWidth - params.blockSize;
         let positionI = 0;
@@ -290,6 +284,7 @@
           }
           positionI += params.blockSize * 10;
         }
+        
       }
 
       function setDefaults() {
@@ -431,6 +426,17 @@
 
       function openCanvas() {
         window.open(document.getElementById("outputCanvas").toDataURL());
+      }
+
+      function renderPreview(outputCanvas){
+        // var canvas = document.createElement("canvas");
+        // var context = canvas.getContext && canvas.getContext("2d");
+        // canvas.height=canvas.width=500;
+        // context.drawImage(outputCanvas,0,0);
+        let src= outputCanvas.toDataURL();
+        let img = `<img width="500px" height="500px" style="cursor:pointer" src="${src}" alt="img" onclick="openCanvas()"/>`;
+        $('#preview').attr('src',`${src}`);
+        
       }
     </script>
   </body>
