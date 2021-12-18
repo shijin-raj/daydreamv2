@@ -34,6 +34,16 @@
         background: white;
         border-radius: 20px;
         padding: 0px;
+        margin-top: 30px;
+        margin-bottom: 30px;
+        max-width: 580px;
+        width: fit-content;
+        
+      }
+      .src-container{
+        display:flex;
+        justify-content: center;
+        flex-wrap: wrap;
       }
       .img {
         width: 500px;
@@ -66,8 +76,9 @@
         font-size: 2.5rem;
         cursor: pointer;
         padding:2rem;
-        color: white;
-        background: rgb(47, 3, 68);
+
+        color: brown;
+        /* background: rgb(47, 3, 68); */
         transition: all 1s ease;
       }
       .logo .sub-text {
@@ -81,6 +92,7 @@
       .image-box{
         width: 200px;
         height: 200px;
+        cursor: pointer;
 display: flex;
 justify-content: center;
 align-items: center;
@@ -89,7 +101,7 @@ color: #a4a4a4;
 font-size: 14px;
 transition: all 1s ease;
 border-radius: 10px;
-border:1px dashed;
+border:1px;
 background-size: cover;
       }
 
@@ -102,40 +114,56 @@ background-size: cover;
      }
 
      .footer{
-      background: rgb(47, 3, 68);
+      /* background: rgb(47, 3, 68); */
       padding: 1rem;
       color: rgb(179, 178, 178);
       text-align: center;
-      font-family: "Lobster", cursive;
+      font-size: 12px;
+      margin-top: 20px;
+     }
+
+     .desc{
+      font-size: 12px;
+      color: #9647fd;
+     }
+
+     .prev-img-box{
+      border:1px;
+background-size: cover; 
+border-radius: 10px;
      }
     </style>
 
     <div class="container">
       <div class="logo">PIXUM <span class="sub-text">OPUS</span></div>
       <div>
-        <div class="d-flex border flex-nowrap p-4" id="previewSource"> 
+        <h6 class="px-4 mt-3">Choose the background image</h6>
+        <div class="px-4 desc">This will be our canvas image</div>
+
+        <div class="d-flex flex-wrap my-4 justify-content-center" id="previewSource"> 
           <div class="image-box m-3" >
             <div class="d-flex justify-content-center flex-column align-items-center">
-              <img class="alt-img" src="assets/gallery.png" width="100px" alt=""  onclick="triggerFileInput('sourceInput')"/>
-              <div>Choose a canvas image</div>
+              <img class="alt-img" src="assets/gallery.png" width="42px" alt=""  onclick="triggerFileInput('sourceInput')"/>
+              <div class="text-center mt-2">Choose a canvas image</div>
             </div>
           </div>
         </div>
-        <div class="d-flex border flex-wrap p-4" id="previewSubSource">
+        <h6 class="px-4 mt-3">Choose Subimages</h6>
+        <div class="px-4 desc">We will combine these images to generate our <strong>Pixum Opus</strong></div>
+        <div class="d-flex flex-wrap my-4 justify-content-center" id="previewSubSource">
           <div class="image-box m-3" onclick="triggerFileInput('sourceSubInput')">
             <div class="d-flex justify-content-center flex-column align-items-center">
-              <img class="alt-img" src="assets/gallery.png" width="100px" alt=""/>
-              <div class="text-center">Choose multiple <br/>images to combine</div>
+              <img class="alt-img" src="assets/gallery.png" width="42px" alt=""/>
+              <div class="text-center mt-2"">Choose multiple <br/>images to combine</div>
             </div>
           </div>
   
       
         </div>
-        <div class="border p-4 d-flex align-items-end justify-content-end">
-          <button class="btn btn-primary btn-lg mx-3" id="btnRender">
+        <div class="d-flex justify-content-center">
+          <button class="btn btn-primary" id="btnRender">
             Render
           </button>
-
         </div>
       </div>
 
@@ -179,23 +207,24 @@ background-size: cover;
         
       </div>
      
-      <div id="imgContainer" class="img-container mt-3 d-flex" >
-        <div id="sourceContainer">
+      <div id="imgContainer" class="img-container mt-3 " >
+        <div id="sourceContainer" class="src-container" style="display: none;">
           <!-- https://picsum.photos/500 for random pictures -->
-          <img src="" alt="" id="i" crossorigin="anonymous" />
+          <img src="" alt="" id="i" crossorigin="anonymous" class="mt-3 prev-img-box"/>
           <a href="" id="downloadLink" download="Daydream.png">
             <img
               src=""
-              alt="preview"
+              alt=""
               id="preview"
               crossorigin="anonymous"
               width="500px"
               height="500px"
               style="cursor: pointer;"
-            />
+            /
+            class="mt-3 prev-img-box">
           </a>
         </div>
-        <div id="outputContainer">
+        <div id="outputContainer" class="d-flex justify-content-center">
           <div
             class="spinner-border text-primary m-2"
             style="display: none"
@@ -213,6 +242,15 @@ background-size: cover;
         style="border: 1px solid black; display: none"
       >
       </canvas>
+<!-- 
+      <canvas
+      id="outputTextCanvas"
+      width="5000"
+      height="5000"
+      style="border: 1px solid black; background: white;"
+    >
+    </canvas> -->
+
       <div class="footer">
 Shijin Raj
       </div>
@@ -314,13 +352,13 @@ Shijin Raj
       $(document).ready(() => {
         $("input").val("");
 
-        $("#i").on("load", () => {
           setDefaults();
-          $(`#outputLoader`).show();
-          processImage(() => {
-            $(`#outputLoader`).hide();
-          });
-        });
+        // $("#i").on("load", () => {
+        //   $(`#outputLoader`).show();
+        //   processImage(() => {
+        //     $(`#outputLoader`).hide();
+        //   });
+        // });
         $("#blockSize").on("input", (e) => {
           if (e.target.value < 5) {
             $("#blockSize").val(5);
@@ -329,6 +367,12 @@ Shijin Raj
         });
         $("#btnRender").on("click", (e) => {
           let btnElement = $("#btnRender");
+
+          if(subColors.length<1){
+            alert("Please choose background image and atleast one sub image!")
+            return;
+          }
+
           btnElement.prop("disabled", true);
           btnElement.text("Rendering...");
           $(`#outputLoader`).show();
@@ -336,6 +380,8 @@ Shijin Raj
             processImage(() => {
               btnElement.prop("disabled", false);
               btnElement.text("Render");
+              
+              $(`#sourceContainer`).show();
               $(`#outputLoader`).hide();
               renderPreview(document.getElementById("outputCanvas"));
             });
@@ -356,8 +402,6 @@ Shijin Raj
           for (let j = 0; j < params.gridCols; j++) {
             let rgb = rgbProps[i][j];
             if (rgb) {
-              // let div=`<div style="background:rgb(${rgb.r},${rgb.g},${rgb.b})" id="box_${i}_${j}"></div>`;
-              // grid.append(div);
               if (subColors.length > 0) {
                 let colorVal = getColorVal(rgb);
                 let min = Math.abs(colorVal - subColors[0].colorVal);
@@ -370,10 +414,6 @@ Shijin Raj
                   }
                 });
                 if (match) {
-                  //  let imgSrc= $(`#${match.id}`).attr('src');
-                  //  let img= `<img src="${imgSrc}" style="width:${params.blockSize}px;height:${params.blockSize}px" alt="img" id="box_${i}_${j}"></img>`;
-                  // grid.append(img);
-
                   var img = document.getElementById(match.id);
                   context.drawImage(
                     img,
@@ -396,7 +436,7 @@ Shijin Raj
       }
 
       function setDefaults() {
-        $("#blockSize").val(5);
+        $("#blockSize").val(20);
         $("#sliderVal").text(5);
       }
 
@@ -410,13 +450,14 @@ Shijin Raj
       }
 
       function parseInputs() {
-        let blockSize = parseInt($("#blockSize").val());
+       /// let blockSize = parseInt($("#blockSize").val());
+       blockSize=10;
         if (blockSize < 5) {
           blockSize = 5;
           $("#blockSize").val(blockSize);
         }
-        let imgWidth = parseInt($("#i").width());
-        let imgHeight = parseInt($("#i").height());
+
+        let imgWidth=imgHeight=500;
         let gridRows = ~~(imgWidth / blockSize);
         let gridCols = ~~(imgHeight / blockSize);
 
@@ -546,6 +587,7 @@ Shijin Raj
         $("#preview").attr("src", `${src}`);
         $("#downloadLink").attr("href", `${src}`);
       }
+
     </script>
   </body>
 </html>
