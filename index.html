@@ -36,9 +36,8 @@
         padding: 0px;
         margin-top: 30px;
         margin-bottom: 30px;
-        max-width: 580px;
-        width: fit-content;
-        
+        width: 640px;
+        border: 2px solid #d5caca;
       }
       .src-container{
         display:flex;
@@ -76,8 +75,8 @@
         font-size: 2.5rem;
         cursor: pointer;
         padding:2rem;
-
-        color: brown;
+        border-bottom: 2px solid #d5caca;
+        color: #5c0895;
         /* background: rgb(47, 3, 68); */
         transition: all 1s ease;
       }
@@ -124,13 +123,31 @@ background-size: cover;
 
      .desc{
       font-size: 12px;
-      color: #9647fd;
+      color: #9fc1a1;
      }
 
      .prev-img-box{
       border:1px;
 background-size: cover; 
 border-radius: 10px;
+     }
+
+     .img-button{
+       width: 100%;
+       text-align: center;
+       align-self: flex-end;
+       padding-top: 10px;
+       padding-bottom: 10px;
+      transition: all 0.5s ease;
+       color:white;
+      background: rgba(41, 41, 41, 0.397);
+      border-bottom-left-radius: 10px ;
+      border-bottom-right-radius: 10px ;
+
+     }
+     .img-button:hover{
+      background: rgba(255, 255, 255, 0.397);
+      color: black;
      }
     </style>
 
@@ -259,11 +276,72 @@ Shijin Raj
     <script>
       var subColors = [];
 
-      function createImageBox(containerId,dataURL,id){
-        let imgBox=`
-          <div id="${id}" class="image-box m-3" style="background-image:url('${dataURL}');background-size:'cover';">
-          </div>`;
-          $(`#${containerId}`).append(imgBox);
+      $(document).ready(() => {
+        $("input").val("");
+
+          setDefaults();
+     
+          let options={btnText:'Choose an image', btnAction:()=>{triggerFileInput('sourceInput')}};
+          $('#previewSource').html('');
+          $('#previewSubSource').html('');
+          createImageBox('previewSource','assets/gallery.png','srcPreview',options);
+          options={btnText:'Choose multiple images',btnAction:()=>{triggerFileInput('sourceSubInput')}};
+          createImageBox('previewSubSource','assets/gallery.png','subSrcPreview',options);
+          
+
+        $("#blockSize").on("input", (e) => {
+          if (e.target.value < 5) {
+            $("#blockSize").val(5);
+          }
+          $(`#sliderVal`).text($("#blockSize").val());
+        });
+        $("#btnRender").on("click", (e) => {
+          let btnElement = $("#btnRender");
+
+          if(subColors.length<1){
+            alert("Please choose background image and atleast one sub image!")
+            return;
+          }
+
+          btnElement.prop("disabled", true);
+          btnElement.text("Rendering...");
+          $(`#outputLoader`).show();
+          setTimeout(() => {
+            processImage(() => {
+              btnElement.prop("disabled", false);
+              btnElement.text("Render");
+              
+              $(`#sourceContainer`).show();
+              $(`#outputLoader`).hide();
+              renderPreview(document.getElementById("outputCanvas"));
+            });
+          }, 100);
+        });
+      });
+      function createImageBox(containerId,dataURL,id,options=null){
+        let btnText = (options&&options.btnText)?options.btnText:'Change image';
+        let btnAction= (options&&options.btnAction)?options.btnAction:null;
+        let imgBoxParentEl= $('<div>',{
+            id:`${id}`,
+            class:'image-box m-3',
+        });
+        imgBoxParentEl.css('background-image',`url('${dataURL}')`);
+        imgBoxParentEl.css('background-size','cover');
+        if(id=='srcPreview'||id=='subSrcPreview'){
+          let imgBoxEl= $('<div>',{
+              class:'img-button',
+          });
+          imgBoxEl.text(btnText);
+          imgBoxEl.on('click',btnAction);
+          imgBoxParentEl.append(imgBoxEl);
+        }
+        $(`#${containerId}`).append(imgBoxParentEl);
+
+        // let imgBox=`
+        //   <div id="${id}" class="image-box m-3" style="background-image:url('${dataURL}');background-size:'cover';">
+        //   <div class="img-button">Change image</div>
+        //     </div>`;
+        //   $(`#${containerId}`).append(imgBox);
       }
       
       function triggerFileInput(sourceInputId){
@@ -311,7 +389,9 @@ Shijin Raj
           reader.onload = function (e) {
             $(`#${output}`).attr("src", e.target.result);
             // $(`#${preview}`).css("background-image",`url('${e.target.result}')`).find('*').hide();
-            createImageBox('previewSource',e.target.result,"prev_source_img");
+            $('#previewSource').html('');
+            let options={btnText:'Change image', btnAction:()=>{triggerFileInput('sourceInput')}};
+            createImageBox('previewSource',e.target.result,"prev_source_img",options);
           };
 
           reader.readAsDataURL(input.files[0]);
@@ -349,45 +429,6 @@ Shijin Raj
         return parseFloat(r + g + b);
       }
 
-      $(document).ready(() => {
-        $("input").val("");
-
-          setDefaults();
-        // $("#i").on("load", () => {
-        //   $(`#outputLoader`).show();
-        //   processImage(() => {
-        //     $(`#outputLoader`).hide();
-        //   });
-        // });
-        $("#blockSize").on("input", (e) => {
-          if (e.target.value < 5) {
-            $("#blockSize").val(5);
-          }
-          $(`#sliderVal`).text($("#blockSize").val());
-        });
-        $("#btnRender").on("click", (e) => {
-          let btnElement = $("#btnRender");
-
-          if(subColors.length<1){
-            alert("Please choose background image and atleast one sub image!")
-            return;
-          }
-
-          btnElement.prop("disabled", true);
-          btnElement.text("Rendering...");
-          $(`#outputLoader`).show();
-          setTimeout(() => {
-            processImage(() => {
-              btnElement.prop("disabled", false);
-              btnElement.text("Render");
-              
-              $(`#sourceContainer`).show();
-              $(`#outputLoader`).hide();
-              renderPreview(document.getElementById("outputCanvas"));
-            });
-          }, 100);
-        });
-      });
 
       function outputImage(rgbProps) {
         let params = parseInputs();
