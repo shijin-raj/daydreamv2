@@ -39,6 +39,17 @@
         width: 640px;
         border: 2px solid #d5caca;
       }
+
+
+      @media only screen and (max-width: 600px) {
+        .container{
+          border-radius: 0px;
+          border: none;
+          margin: 0px;
+          width: 100%;
+        }
+}
+
       .src-container{
         display:flex;
         justify-content: center;
@@ -92,16 +103,16 @@
         width: 200px;
         height: 200px;
         cursor: pointer;
-display: flex;
-justify-content: center;
-align-items: center;
-background: #f1eef2;
-color: #a4a4a4;
-font-size: 14px;
-transition: all 1s ease;
-border-radius: 10px;
-border:1px;
-background-size: cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #f1eef2;
+        color: #a4a4a4;
+        font-size: 14px;
+        transition: all 1s ease;
+        border-radius: 10px;
+        border:1px;
+        background-size: cover;
       }
 
       .alt-img{
@@ -140,22 +151,21 @@ border-radius: 10px;
        padding-bottom: 10px;
       transition: all 0.5s ease;
        color:white;
-      background: rgba(41, 41, 41, 0.397);
+      background:rgba(27, 0, 217, 0.4);
       border-bottom-left-radius: 10px ;
       border-bottom-right-radius: 10px ;
 
      }
      .img-button:hover{
-      background: rgba(255, 255, 255, 0.397);
-      color: black;
+      background:rgba(27, 0, 217, 0.8);
      }
     </style>
 
     <div class="container">
       <div class="logo">PIXUM <span class="sub-text">OPUS</span></div>
-      <div>
-        <h6 class="px-4 mt-3">Choose the background image</h6>
-        <div class="px-4 desc">This will be our canvas image</div>
+      <div class="p-4">
+        <h6 class="mt-3">Choose the background image</h6>
+        <div class="desc">This will be our canvas image</div>
 
         <div class="d-flex flex-wrap my-4 justify-content-center" id="previewSource"> 
           <div class="image-box m-3" >
@@ -165,8 +175,8 @@ border-radius: 10px;
             </div>
           </div>
         </div>
-        <h6 class="px-4 mt-3">Choose Subimages</h6>
-        <div class="px-4 desc">We will combine these images to generate our <strong>Pixum Opus</strong></div>
+        <h6 class="mt-3">Choose Subimages</h6>
+        <div class="desc">We will combine these images to generate our <strong>Pixum Opus</strong></div>
         <div class="d-flex flex-wrap my-4 justify-content-center" id="previewSubSource">
           <div class="image-box m-3" onclick="triggerFileInput('sourceSubInput')">
             <div class="d-flex justify-content-center flex-column align-items-center">
