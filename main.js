@@ -19,6 +19,14 @@ $(document).ready(() => {
     }
     $(`#sliderVal`).text($("#blockSize").val());
   });
+  $("#downloadBtn").on("click", (e) => {
+    let link = document.createElement("a");
+    link.href = document.getElementById("outputCanvas").toDataURL();
+    link.download = "DayDream.png";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
   $("#btnRender").on("click", (e) => {
     let btnElement = $("#btnRender");
 
@@ -340,5 +348,4 @@ function openCanvas() {
 function renderPreview(outputCanvas) {
   let src = outputCanvas.toDataURL();
   $("#preview").attr("src", `${src}`);
-  $("#downloadLink").attr("href", `${src}`);
 }
