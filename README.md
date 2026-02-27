@@ -17,8 +17,8 @@ Click the link above to try Day Dream v2 right now - no installation needed!
 Day Dream v2 creates a beautiful mosaic by:
 
 1. **Analyzing Your Canvas Image** - Divides your main image into a grid of blocks
-2. **Analyzing Your Sub-Images** - Extracts the dominant color from each image you upload
-3. **Intelligent Matching** - For each block in the canvas, finds the sub-image with the closest matching color
+2. **Analyzing Your Sub-Images** - Extracts the dominant color from each image you upload (automatically normalizes all images to 500×500px)
+3. **Intelligent Matching** - Uses Euclidean distance in RGB color space to find the sub-image with the closest matching color for each block
 4. **Creating the Mosaic** - Replaces each block with the color-matched sub-image to create the final artistic composition
 
 The result is a stunning mosaic where the overall image matches your canvas, but is made up of pieces of your uploaded images!
@@ -29,6 +29,9 @@ The result is a stunning mosaic where the overall image matches your canvas, but
 - **Real-time Preview**: See thumbnail previews of your selected images
 - **Color Visualization**: Visual indicators showing the dominant color of each sub-image
 - **High-Quality Output**: Generates 5000×5000px output canvas for detailed results
+- **Smart Image Handling**: Automatically normalizes sub-images to 500×500px (handles any image dimensions)
+- **Intelligent Color Matching**: Uses RGB Euclidean distance for accurate color-to-image matching
+- **Smart Button State**: Render button enables only when canvas image and sub-images are uploaded
 - **Responsive Design**: Works on desktop and mobile devices
 - **Easy Download**: Download your finished mosaic in one click
 
@@ -78,6 +81,7 @@ daydreamv2/
 - **Image Quality**: Use clear, well-lit images for better color detection
 - **Number of Images**: 5-10 sub-images usually produce good results
 - **Canvas Image**: Use images with good color variation (landscapes work well)
+- **Image Dimensions**: Sub-images of any size work - they're automatically normalized to 500×500px
 - **Block Size**: Adjust block size for more or less detail (not currently exposed in UI)
 
 ## Technologies Used
@@ -121,7 +125,6 @@ daydreamv2/
 ## Known Limitations
 
 - Canvas processing is single-threaded (may block UI for large images)
-- Color matching is based on luminance only (could be enhanced with RGB distance)
 - Block size is fixed in code (not user-configurable via UI)
 - Cross-origin images may have security restrictions
 

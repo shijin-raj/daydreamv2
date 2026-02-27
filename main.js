@@ -1,5 +1,7 @@
 var subColors = [];
 var sourceImageDimensions = { width: 500, height: 500 }; // Store actual source image dimensions
+var isSourceImageUploaded = false;
+var isSubImagesUploaded = false;
 
 $(document).ready(() => {
   $("input").val("");
@@ -71,39 +73,85 @@ function createImageBox(containerId, dataURL, id, options = null) {
   $(`#${containerId}`).append(imgBoxParentEl);
 }
 
+function normalizeImageTo500x500(imgElement) {
+  const NORMALIZED_SIZE = 500;
+  const canvas = document.createElement('canvas');
+  canvas.width = NORMALIZED_SIZE;
+  canvas.height = NORMALIZED_SIZE;
+  
+  const ctx = canvas.getContext('2d');
+  const imgWidth = imgElement.width;
+  const imgHeight = imgElement.height;
+  const imgAspectRatio = imgWidth / imgHeight;
+  const canvasAspectRatio = 1; // 500x500 is square
+  
+  let drawWidth, drawHeight, offsetX, offsetY;
+  
+  if (imgAspectRatio > canvasAspectRatio) {
+    // Image is wider - scale by height, crop left/right
+    drawHeight = NORMALIZED_SIZE;
+    drawWidth = NORMALIZED_SIZE * imgAspectRatio;
+    offsetY = 0;
+    offsetX = (NORMALIZED_SIZE - drawWidth) / 2;
+  } else {
+    // Image is taller - scale by width, crop top/bottom
+    drawWidth = NORMALIZED_SIZE;
+    drawHeight = NORMALIZED_SIZE / imgAspectRatio;
+    offsetX = 0;
+    offsetY = (NORMALIZED_SIZE - drawHeight) / 2;
+  }
+  
+  ctx.drawImage(imgElement, offsetX, offsetY, drawWidth, drawHeight);
+  return canvas.toDataURL();
+}
+
 function triggerFileInput(sourceInputId) {
   $(`#${sourceInputId}`).trigger('click');
+}
+
+function updateRenderButtonState() {
+  const isEnabled = isSourceImageUploaded && isSubImagesUploaded;
+  $("#btnRender").prop("disabled", !isEnabled);
 }
 
 function readMultipleFiles(input) {
   $(`#source`).html("");
   subColors = [];
+  isSubImagesUploaded = false;
   if (input.files && input.files[0]) {
     let count = input.files.length;
+    isSubImagesUploaded = true;
     for (let i = 0; i < count; i++) {
       var reader = new FileReader();
 
       reader.onload = function (e) {
-        let div = document.createElement("div");
-        let imgEl = $("<img>", {
-          id: `img_${i + 1}`,
-          class: "sub-image",
-          alt: "img",
-          src: e.target.result,
-          crossorigin: "anonymous",
-          style: "width: 500px; height: 500px; object-fit: cover;"
-        });
-        imgEl.on("load", () => {
-          calculateSubColor(imgEl);
-        });
-        console.log(imgEl);
-        $(div).html(imgEl);
-        $(`#source`).append(div);
-        createImageBox('previewSubSource', e.target.result, `prev_img_${i + 1}`);
+        let tempImg = new Image();
+        tempImg.onload = function() {
+          // Normalize the image to 500x500
+          let normalizedDataURL = normalizeImageTo500x500(tempImg);
+          
+          let div = document.createElement("div");
+          let imgEl = $("<img>", {
+            id: `img_${i + 1}`,
+            class: "sub-image",
+            alt: "img",
+            src: normalizedDataURL,
+            crossorigin: "anonymous",
+            style: "width: 500px; height: 500px; object-fit: cover;"
+          });
+          imgEl.on("load", () => {
+            calculateSubColor(imgEl);
+          });
+          $(div).html(imgEl);
+          $(`#source`).append(div);
+          createImageBox('previewSubSource', normalizedDataURL, `prev_img_${i + 1}`);
+        };
+        tempImg.src = e.target.result;
       };
 
       reader.readAsDataURL(input.files[i]);
     }
+    updateRenderButtonState();
   }
 }
 
@@ -117,6 +165,8 @@ function readURL(input, output = "i", preview = "previewSource") {
         // Store the actual image dimensions
         sourceImageDimensions = { width: img.width, height: img.height };
         console.log('Source image dimensions:', sourceImageDimensions);
+        isSourceImageUploaded = true;
+        updateRenderButtonState();
       };
       img.src = e.target.result;
       
@@ -143,9 +193,7 @@ function calculateSubColor(imgEl) {
   );
   if (itemIndex < 0) {
     rgb.id = imgId;
-    rgb.colorVal = getColorVal(rgb);
     subColors.push(rgb);
-    subColors = [...new Set(subColors)];
     console.log(subColors, itemIndex);
   }
   let div = `<div class="align-self-end shadow mb-2 rounded" style="background:rgb(${rgb.r},${rgb.g},${
@@ -177,13 +225,17 @@ function outputImage(rgbProps) {
       let rgb = rgbProps[i][j];
       if (rgb) {
         if (subColors.length > 0) {
-          let colorVal = getColorVal(rgb);
-          let min = Math.abs(colorVal - subColors[0].colorVal);
+          // Calculate Euclidean distance in RGB space
+          let minDistance = Infinity;
           let match = subColors[0];
           subColors.forEach((item) => {
-            let diff = Math.abs(colorVal - item.colorVal);
-            if (diff < min) {
-              min = diff;
+            let distance = Math.sqrt(
+              Math.pow(rgb.r - item.r, 2) + 
+              Math.pow(rgb.g - item.g, 2) + 
+              Math.pow(rgb.b - item.b, 2)
+            );
+            if (distance < minDistance) {
+              minDistance = distance;
               match = item;
             }
           });
