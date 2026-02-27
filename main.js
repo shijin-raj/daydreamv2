@@ -11,9 +11,9 @@ $(document).ready(() => {
   let options = { btnText: 'Choose an image', btnAction: () => { triggerFileInput('sourceInput') } };
   $('#previewSource').html('');
   $('#previewSubSource').html('');
-  createImageBox('previewSource', 'assets/gallery.png', 'srcPreview', options);
+  createImageBox('previewSource', 'assets/gallery.svg', 'srcPreview', options);
   options = { btnText: 'Choose multiple images', btnAction: () => { triggerFileInput('sourceSubInput') } };
-  createImageBox('previewSubSource', 'assets/gallery.png', 'subSrcPreview', options);
+  createImageBox('previewSubSource', 'assets/gallery.svg', 'subSrcPreview', options);
 
   $("#blockSize").on("input", (e) => {
     if (e.target.value < 5) {

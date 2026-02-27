@@ -51,7 +51,7 @@ daydreamv2/
 ├── main.js             # Core application logic
 ├── README.md           # This file
 └── assets/
-    └── gallery.png     # Placeholder icon
+    └── gallery.svg     # Placeholder icon
 ```
 
 ## Usage
