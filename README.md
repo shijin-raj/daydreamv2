@@ -6,40 +6,22 @@ A creative image mosaic generator that creates stunning photo composites by anal
 
 Day Dream v2 is a web-based application that transforms a main image into a mosaic by replacing segments of the image with the most color-matched sub-images. It's a visual art tool that creates beautiful compositions by analyzing and matching colors.
 
+## 🚀 Try the Demo
+
+**Live Demo**: https://shijin-raj.github.io/daydreamv2/
+
+Click the link above to try Day Dream v2 right now - no installation needed!
+
 ## How It Works
 
-### Step 1: Input Collection
-- **Canvas Image**: Upload a main/background image that will serve as the base for your mosaic
-- **Sub-Images**: Upload multiple images that will be used as "tiles" in the final mosaic composition
+Day Dream v2 creates a beautiful mosaic by:
 
-### Step 2: Color Analysis of Sub-Images
-For each uploaded sub-image, the application:
-1. Calculates the **average/dominant color** by analyzing all pixels in the image
-2. Converts the RGB color to a single luminance value for easier color matching
-3. Stores this color information for later matching
+1. **Analyzing Your Canvas Image** - Divides your main image into a grid of blocks
+2. **Analyzing Your Sub-Images** - Extracts the dominant color from each image you upload
+3. **Intelligent Matching** - For each block in the canvas, finds the sub-image with the closest matching color
+4. **Creating the Mosaic** - Replaces each block with the color-matched sub-image to create the final artistic composition
 
-### Step 3: Grid Division
-The canvas image is divided into a uniform grid of blocks (default block size: 10 units):
-- Each block represents a section of the canvas image
-- The entire 500×500px canvas is divided into 50×50 blocks
-
-### Step 4: Color Extraction from Canvas
-For each grid block in the canvas image:
-1. Extracts the pixel data from that block
-2. Calculates the **average/dominant color** of that block
-3. Converts the RGB values to luminance for comparison
-
-### Step 5: Color Matching & Replacement
-For each canvas block:
-1. Compares its dominant color against all sub-image colors
-2. Finds the sub-image with the **closest color match** (smallest difference in luminance)
-3. Replaces the block with the matched sub-image, scaled to fit the block size
-
-### Step 6: Output
-The final result is a mosaic where:
-- Each block of the original canvas image is replaced with a piece of a color-matched sub-image
-- The overall composition maintains the colors and patterns of the original canvas image
-- The result can be downloaded as a PNG image
+The result is a stunning mosaic where the overall image matches your canvas, but is made up of pieces of your uploaded images!
 
 ## Features
 
@@ -52,16 +34,9 @@ The final result is a mosaic where:
 
 ## Technical Details
 
-### Color Matching Algorithm
-The application uses a **luminance-based color matching system**:
-- Converts RGB colors to perceived brightness using: `L = 0.2126×R + 0.7152×G + 0.0722×B`
-- Finds the sub-image with the closest luminance value to each canvas block
-- Uses absolute difference as the distance metric
-
-### Image Processing
-- Canvas image size: 500×500 pixels
-- Output canvas size: 5000×5000 pixels
-- Block scaling: Each block is scaled 10x in the output
+### Image Processing Specs
+- Canvas image processing resolution: 500×500 pixels
+- Output mosaic resolution: 5000×5000 pixels (high quality for downloading)
 - Supported formats: PNG, JPG, GIF, WebP (any format your browser supports)
 
 ## File Structure
@@ -81,25 +56,21 @@ daydreamv2/
 ### Basic Steps
 
 1. **Upload Canvas Image**
-   - Click "Choose a canvas image"
-   - Select your main image (ideally 500×500px or will be scaled)
+   - Click "Select Your Canvas"
+   - Choose your main image
 
 2. **Upload Sub-Images**
-   - Click "Choose multiple images to combine"
-   - Select multiple images with different prominent colors
-   - Recommended: Use 3-10 images for best results
+   - Click "Collect Your Colors"
+   - Select 3-10 images with different colors
+   - Each will contribute a unique color to your mosaic
 
-3. **View Color Information**
-   - Small color boxes appear under each sub-image
-   - These show the dominant color detected in each image
+3. **Create Your Mosaic**
+   - Click "✨ Create Magic ✨" button
+   - Watch the mosaic generate in real-time
 
-4. **Render**
-   - Click the "Render" button
-   - Wait for the processing to complete
-   - View the generated mosaic in real-time
-
-5. **Download**
-   - Click on the final mosaic image to download
+4. **Download**
+   - Click the "⬇️ Download Full Resolution" button
+   - Save your finished mosaic as a PNG
 
 ### Tips for Best Results
 
