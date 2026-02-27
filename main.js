@@ -1,4 +1,5 @@
 var subColors = [];
+var sourceImageDimensions = { width: 500, height: 500 }; // Store actual source image dimensions
 
 $(document).ready(() => {
   $("input").val("");
@@ -75,9 +76,6 @@ function readMultipleFiles(input) {
       var reader = new FileReader();
 
       reader.onload = function (e) {
-        let img = `<img src="${e.target.result}" alt="img" id="img_${
-          i + 1
-        }" class="sub-image" />`;
         let div = document.createElement("div");
         let imgEl = $("<img>", {
           id: `img_${i + 1}`,
@@ -85,6 +83,7 @@ function readMultipleFiles(input) {
           alt: "img",
           src: e.target.result,
           crossorigin: "anonymous",
+          style: "width: 500px; height: 500px; object-fit: cover;"
         });
         imgEl.on("load", () => {
           calculateSubColor(imgEl);
@@ -105,6 +104,14 @@ function readURL(input, output = "i", preview = "previewSource") {
     var reader = new FileReader();
 
     reader.onload = function (e) {
+      let img = new Image();
+      img.onload = function() {
+        // Store the actual image dimensions
+        sourceImageDimensions = { width: img.width, height: img.height };
+        console.log('Source image dimensions:', sourceImageDimensions);
+      };
+      img.src = e.target.result;
+      
       $(`#${output}`).attr("src", e.target.result);
       $('#previewSource').html('');
       let options = { btnText: 'Change image', btnAction: () => { triggerFileInput('sourceInput') } };
@@ -200,6 +207,12 @@ function setDefaults() {
 }
 
 function processImage(callback = null) {
+  // Create canvas with dynamic dimensions based on actual source image size
+  let canvas = document.getElementById("outputCanvas");
+  canvas.width = sourceImageDimensions.width * 10;
+  canvas.height = sourceImageDimensions.height * 10;
+  console.log('Canvas created with dimensions:', canvas.width, 'x', canvas.height);
+  
   extractRGB().then((data) => {
     outputImage(data);
     if (callback) {
@@ -215,9 +228,11 @@ function parseInputs() {
     $("#blockSize").val(blockSize);
   }
 
-  let imgWidth = imgHeight = 500;
-  let gridRows = ~~(imgWidth / blockSize);
-  let gridCols = ~~(imgHeight / blockSize);
+  // Use actual source image dimensions instead of hardcoded 500x500
+  let imgWidth = sourceImageDimensions.width;
+  let imgHeight = sourceImageDimensions.height;
+  let gridRows = ~~(imgHeight / blockSize);
+  let gridCols = ~~(imgWidth / blockSize);
 
   return {
     blockSize,
@@ -238,6 +253,7 @@ function extractRGB(imageId = "i") {
     for (let i = 0; i <= maxHeight; i += params.blockSize) {
       let row = [];
       for (let j = 0; j <= maxWidth; j += params.blockSize) {
+        // For dynamic source images, sample the actual dimensions
         let rgb = getAverageRGB(imgElem, j, i, params.blockSize);
         row.push(rgb);
       }
@@ -323,7 +339,6 @@ function openCanvas() {
 
 function renderPreview(outputCanvas) {
   let src = outputCanvas.toDataURL();
-  let img = `<img width="500px" height="500px" style="cursor:pointer" src="${src}" alt="img" />`;
   $("#preview").attr("src", `${src}`);
   $("#downloadLink").attr("href", `${src}`);
 }
